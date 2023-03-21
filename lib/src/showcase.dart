@@ -232,6 +232,15 @@ class Showcase extends StatefulWidget {
   /// Provides padding around the description. Default padding is zero.
   final EdgeInsets? descriptionPadding;
 
+  /// Provides a callback when barrier has been clicked.
+  ///
+  /// Note-: Even if barrier interactions are disabled, this handler
+  /// will still provide a callback.
+  final VoidCallback? onBarrierClick;
+
+  /// Whether disabling barrier interaction - overrides the value set in [ShowCaseWidget]
+  final bool? disableBarrierInteraction;
+
   const Showcase({
     required this.key,
     required this.child,
@@ -273,6 +282,8 @@ class Showcase extends StatefulWidget {
     this.tooltipPosition,
     this.titlePadding,
     this.descriptionPadding,
+    this.onBarrierClick,
+    this.disableBarrierInteraction,
   })  : height = null,
         width = null,
         container = null,
@@ -309,6 +320,8 @@ class Showcase extends StatefulWidget {
     this.onTargetDoubleTap,
     this.disableDefaultTargetGestures = false,
     this.tooltipPosition,
+    this.onBarrierClick,
+    this.disableBarrierInteraction,
   })  : showArrow = false,
         onToolTipClick = null,
         scaleAnimationDuration = const Duration(milliseconds: 300),
@@ -452,6 +465,11 @@ class _ShowcaseState extends State<Showcase> {
     _isTooltipDismissed = false;
   }
 
+  // The value passed to the widget overrides the value passed down from ShowCaseWidget if it is set
+  bool get isBarrierInteractionDisabled =>
+      widget.disableBarrierInteraction ??
+      showCaseWidgetState.disableBarrierInteraction;
+
   Widget buildOverlayOnTarget(
     Offset offset,
     Size size,
@@ -473,9 +491,10 @@ class _ShowcaseState extends State<Showcase> {
       children: [
         GestureDetector(
           onTap: () {
-            if (!showCaseWidgetState.disableBarrierInteraction) {
+            if (!isBarrierInteractionDisabled) {
               _nextIfAny();
             }
+            widget.onBarrierClick?.call();
           },
           child: ClipPath(
             clipper: RRectClipper(
